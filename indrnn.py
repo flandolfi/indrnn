@@ -67,7 +67,7 @@ class IndRNNCell(Layer):
                  activation='tanh',
                  use_bias=True,
                  kernel_initializer='glorot_uniform',
-                 recurrent_initializer='orthogonal',
+                 recurrent_initializer='ones',
                  bias_initializer='zeros',
                  kernel_regularizer=None,
                  recurrent_regularizer=None,
@@ -109,7 +109,7 @@ class IndRNNCell(Layer):
                                       regularizer=self.kernel_regularizer,
                                       constraint=self.kernel_constraint)
         self.recurrent_kernel = self.add_weight(
-            shape=(self.units, 1),
+            shape=(1, self.units),
             name='recurrent_kernel',
             initializer=self.recurrent_initializer,
             regularizer=self.recurrent_regularizer,
@@ -150,7 +150,8 @@ class IndRNNCell(Layer):
 
         if rec_dp_mask is not None:
             prev_output *= rec_dp_mask
-        output = h + K.dot(prev_output, self.recurrent_kernel)
+        output = h + prev_output * self.recurrent_kernel
+        assert K.ndim(output) > 1
         if self.activation is not None:
             output = self.activation(output)
 
@@ -283,35 +284,35 @@ class IndRNN(RNN):
             recurrent_dropout = 0.
 
         cell = IndRNNCell(units,
-                             activation=activation,
-                             use_bias=use_bias,
-                             kernel_initializer=kernel_initializer,
-                             recurrent_initializer=recurrent_initializer,
-                             bias_initializer=bias_initializer,
-                             kernel_regularizer=kernel_regularizer,
-                             recurrent_regularizer=recurrent_regularizer,
-                             bias_regularizer=bias_regularizer,
-                             kernel_constraint=kernel_constraint,
-                             recurrent_constraint=recurrent_constraint,
-                             bias_constraint=bias_constraint,
-                             dropout=dropout,
-                             recurrent_dropout=recurrent_dropout)
+                          activation=activation,
+                          use_bias=use_bias,
+                          kernel_initializer=kernel_initializer,
+                          recurrent_initializer=recurrent_initializer,
+                          bias_initializer=bias_initializer,
+                          kernel_regularizer=kernel_regularizer,
+                          recurrent_regularizer=recurrent_regularizer,
+                          bias_regularizer=bias_regularizer,
+                          kernel_constraint=kernel_constraint,
+                          recurrent_constraint=recurrent_constraint,
+                          bias_constraint=bias_constraint,
+                          dropout=dropout,
+                          recurrent_dropout=recurrent_dropout)
         super(IndRNN, self).__init__(cell,
-                                        return_sequences=return_sequences,
-                                        return_state=return_state,
-                                        go_backwards=go_backwards,
-                                        stateful=stateful,
-                                        unroll=unroll,
-                                        **kwargs)
+                                     return_sequences=return_sequences,
+                                     return_state=return_state,
+                                     go_backwards=go_backwards,
+                                     stateful=stateful,
+                                     unroll=unroll,
+                                     **kwargs)
         self.activity_regularizer = regularizers.get(activity_regularizer)
 
     def call(self, inputs, mask=None, training=None, initial_state=None):
         self.cell._dropout_mask = None
         self.cell._recurrent_dropout_mask = None
         return super(IndRNN, self).call(inputs,
-                                           mask=mask,
-                                           training=training,
-                                           initial_state=initial_state)
+                                        mask=mask,
+                                        training=training,
+                                        initial_state=initial_state)
 
     @property
     def units(self):
@@ -451,7 +452,7 @@ class CuDNNIndRNN(_CuDNNRNN):
     def __init__(self, units,
                  activation='tanh',
                  kernel_initializer='glorot_uniform',
-                 recurrent_initializer='orthogonal',
+                 recurrent_initializer='ones',
                  bias_initializer='zeros',
                  kernel_regularizer=None,
                  recurrent_regularizer=None,
@@ -521,7 +522,7 @@ class CuDNNIndRNN(_CuDNNRNN):
                                       regularizer=self.kernel_regularizer,
                                       constraint=self.kernel_constraint)
         self.recurrent_kernel = self.add_weight(
-            shape=(self.units, 1),
+            shape=(1, self.units,),
             name='recurrent_kernel',
             initializer=self.recurrent_initializer,
             regularizer=self.recurrent_regularizer,
@@ -544,7 +545,7 @@ class CuDNNIndRNN(_CuDNNRNN):
         params = self._canonical_to_params(
             weights=[
                 self.kernel,
-                self.recurrent_kernel,
+                tf.diag(self.recurrent_kernel[0]),
             ],
             biases=[
                 self.bias,
