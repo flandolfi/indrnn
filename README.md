@@ -1,16 +1,16 @@
 # Keras IndRNN Implementation #
 
-This repository contains a Keras implementation of Independently Recurrent Neural Networks (IndRNN, Li et al. [[1]](https://arxiv.org/abs/1803.04831)).
+This repository contains a Keras implementation of the Independently Recurrent Neural Network (IndRNN, Li et al. [[1]](https://arxiv.org/abs/1803.04831)).
 
 The file [`indrnn.py`](https://github.com/flandolfi/indrnn/blob/master/indrnn.py) contains the classes:
 
  - `IndRNNCell`, which construct the basic IndRNN model by slight modifying Keras' `SimpleRNNCell`. Its recurrent kernel is a single-row matrix, which is multiplied element-wise at each timesteps with the model's previous output;
  - `IndRNN`, which is a `RNN` with a single `IndRNNCell`;
- - `CuDNNRNN`, which uses the CuDNN-RNN as a black-box to compute the IndRNN step by trasforming the recurrent kernel in a diagonal matrix. **Warning:** This is just a stub and it is recommended to use the `IndRNN` class instead.
+ - `CuDNNIndRNN`, which uses the CuDNN-RNN as a black-box to compute the IndRNN step by trasforming the recurrent kernel in a diagonal matrix. **Warning:** *This is just a stub and it is recommended to use the `IndRNN` class instead.*
 
 ## Basic Usage ##
 
-The `IndRNN` by default uses a ReLU activation, its recurrent kernel is constrained and initialized with random values in the range (-1, 1). It can be used "as-is", as following
+The `IndRNN` uses by default a ReLU activation, its recurrent kernel is constrained and initialized with random values in the range (-1, 1). It can be used "as-is", as following
 ```python
 from keras.models import Sequential
 from keras.layers import Dense
@@ -50,7 +50,7 @@ model.add(IndRNN(128,
                  input_shape=(None, 2)))
 model.add(Dense(1))
 ```
-Keep in mind that Keras' constraints act by default on kernel's first axis. Since `IndRNN` is a 2-dimensional single-row matrix, applying `MaxNorm` is the same as constraining the kernel's absolute values.
+Keep in mind that Keras' constraints act by default on kernel's first axis. Since `IndRNN` has a 2-dimensional single-row recurrent kernel, applying `MaxNorm` constraint is the same as constraining the kernel's absolute values.
 
 ## Test ##
 
