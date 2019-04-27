@@ -37,6 +37,7 @@ class IndRNNCell(Layer):
             weights matrix,
             used for the linear transformation of the recurrent state
             (see [initializers](../initializers.md)).
+            Default: random uniform in (-1, 1).
         bias_initializer: Initializer for the bias vector
             (see [initializers](../initializers.md)).
         kernel_regularizer: Regularizer function applied to
@@ -64,16 +65,16 @@ class IndRNNCell(Layer):
     """
 
     def __init__(self, units,
-                 activation='tanh',
+                 activation='relu',
                  use_bias=True,
                  kernel_initializer='glorot_uniform',
-                 recurrent_initializer='normal',
+                 recurrent_initializer=None,
                  bias_initializer='zeros',
                  kernel_regularizer=None,
                  recurrent_regularizer=None,
                  bias_regularizer=None,
                  kernel_constraint=None,
-                 recurrent_constraint=None,
+                 recurrent_constraint='min_max_norm',
                  bias_constraint=None,
                  dropout=0.,
                  recurrent_dropout=0.,
@@ -82,6 +83,9 @@ class IndRNNCell(Layer):
         self.units = units
         self.activation = activations.get(activation)
         self.use_bias = use_bias
+
+        if recurrent_initializer is None:
+            recurrent_initializer = initializers.uniform(-1, 1)
 
         self.kernel_initializer = initializers.get(kernel_initializer)
         self.recurrent_initializer = initializers.get(recurrent_initializer)
@@ -202,6 +206,7 @@ class IndRNN(RNN):
             weights matrix,
             used for the linear transformation of the recurrent state
             (see [initializers](../initializers.md)).
+            Default: random uniform in (-1, 1).
         bias_initializer: Initializer for the bias vector
             (see [initializers](../initializers.md)).
         kernel_regularizer: Regularizer function applied to
@@ -249,17 +254,17 @@ class IndRNN(RNN):
 
     @interfaces.legacy_recurrent_support
     def __init__(self, units,
-                 activation='tanh',
+                 activation='relu',
                  use_bias=True,
                  kernel_initializer='glorot_uniform',
-                 recurrent_initializer='normal',
+                 recurrent_initializer=None,
                  bias_initializer='zeros',
                  kernel_regularizer=None,
                  recurrent_regularizer=None,
                  bias_regularizer=None,
                  activity_regularizer=None,
                  kernel_constraint=None,
-                 recurrent_constraint=None,
+                 recurrent_constraint='min_max_norm',
                  bias_constraint=None,
                  dropout=0.,
                  recurrent_dropout=0.,
@@ -407,6 +412,12 @@ class CuDNNIndRNN(_CuDNNRNN):
     """Fast SimpleRNN implementation backed by [CuDNN](https://developer.nvidia.com/cudnn).
     Can only be run on GPU, with the TensorFlow backend.
 
+    # Warning
+        This is class uses a standard CuDNNRNN to compute an IndRNN
+        step (by trasforming the weight vector into a diagonal matrix).
+        This causes a strange behavior during training. It is recommended
+        to use the base `IndRNN` implementation.
+
     # Arguments
         units: Positive integer, dimensionality of the output space.
         activation: Activation function to use. Can be either hyperbolic
@@ -419,6 +430,7 @@ class CuDNNIndRNN(_CuDNNRNN):
             weights matrix,
             used for the linear transformation of the recurrent state.
             (see [initializers](../initializers.md)).
+            Default: random uniform in (-1, 1).
         bias_initializer: Initializer for the bias vector
             (see [initializers](../initializers.md)).
         kernel_regularizer: Regularizer function applied to
@@ -450,16 +462,16 @@ class CuDNNIndRNN(_CuDNNRNN):
     """
 
     def __init__(self, units,
-                 activation='tanh',
+                 activation='relu',
                  kernel_initializer='glorot_uniform',
-                 recurrent_initializer='normal',
+                 recurrent_initializer=None,
                  bias_initializer='zeros',
                  kernel_regularizer=None,
                  recurrent_regularizer=None,
                  bias_regularizer=None,
                  activity_regularizer=None,
                  kernel_constraint=None,
-                 recurrent_constraint=None,
+                 recurrent_constraint='min_max_norm',
                  bias_constraint=None,
                  return_sequences=False,
                  return_state=False,
@@ -477,6 +489,9 @@ class CuDNNIndRNN(_CuDNNRNN):
                              "Found '%s'" % str(activation))
 
         self.activation = activation
+
+        if recurrent_initializer is None:
+            recurrent_initializer = initializers.uniform(-1, 1)
 
         self.kernel_initializer = initializers.get(kernel_initializer)
         self.recurrent_initializer = initializers.get(recurrent_initializer)
