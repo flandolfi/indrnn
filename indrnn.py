@@ -67,7 +67,7 @@ class IndRNNCell(Layer):
                  activation='tanh',
                  use_bias=True,
                  kernel_initializer='glorot_uniform',
-                 recurrent_initializer='ones',
+                 recurrent_initializer='normal',
                  bias_initializer='zeros',
                  kernel_regularizer=None,
                  recurrent_regularizer=None,
@@ -150,8 +150,8 @@ class IndRNNCell(Layer):
 
         if rec_dp_mask is not None:
             prev_output *= rec_dp_mask
-        output = h + prev_output * self.recurrent_kernel
-        assert K.ndim(output) > 1
+        output = h + (prev_output * self.recurrent_kernel)
+        
         if self.activation is not None:
             output = self.activation(output)
 
@@ -252,7 +252,7 @@ class IndRNN(RNN):
                  activation='tanh',
                  use_bias=True,
                  kernel_initializer='glorot_uniform',
-                 recurrent_initializer='orthogonal',
+                 recurrent_initializer='normal',
                  bias_initializer='zeros',
                  kernel_regularizer=None,
                  recurrent_regularizer=None,
@@ -452,7 +452,7 @@ class CuDNNIndRNN(_CuDNNRNN):
     def __init__(self, units,
                  activation='tanh',
                  kernel_initializer='glorot_uniform',
-                 recurrent_initializer='ones',
+                 recurrent_initializer='normal',
                  bias_initializer='zeros',
                  kernel_regularizer=None,
                  recurrent_regularizer=None,
