@@ -17,7 +17,7 @@ from keras.layers import Dense
 from indrnn import IndRNN
 
 model = Sequential()
-model.add(IndRNN(128, input_shape=(None, 1)))
+model.add(IndRNN(128, input_shape=(None, 2)))
 model.add(Dense(1))
 
 model.compile(optimizer='adam', loss='mse')
@@ -26,12 +26,12 @@ model.summary()
 ```
 Layer (type)                 Output Shape              Param #   
 =================================================================
-ind_rnn_3 (IndRNN)           (None, 128)               384       
+ind_rnn_1 (IndRNN)           (None, 128)               512       
 _________________________________________________________________
-dense_3 (Dense)              (None, 1)                 129       
+dense_1 (Dense)              (None, 1)                 129       
 =================================================================
-Total params: 513
-Trainable params: 513
+Total params: 641
+Trainable params: 641
 Non-trainable params: 0
 ```
 
@@ -47,7 +47,7 @@ model = Sequential()
 model.add(IndRNN(128, 
                  recurrent_initializer=RandomUniform(-limit, limit),
                  recurrent_constraint=MaxNorm(limit),
-                 input_shape=(None, 1)))
+                 input_shape=(None, 2)))
 model.add(Dense(1))
 ```
 Keep in mind that Keras' constraints act by default on kernel's first axis. Since `IndRNN` is a 2-dimensional single-row matrix, applying `MaxNorm` is the same as constraining the kernel's absolute values.
