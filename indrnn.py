@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+"""Indipendently Recurrent Neural Network implementation for Keras.
+
+Slight modification of [Keras'](https://github.com/keras-team/keras) 
+`SimpleRNN` class.
+"""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -21,7 +27,7 @@ from collections import namedtuple
 
 
 class IndRNNCell(Layer):
-    """Cell class for SimpleRNN.
+    """Cell class for IndRNN.
     # Arguments
         units: Positive integer, dimensionality of the output space.
         activation: Activation function to use
@@ -190,7 +196,7 @@ class IndRNNCell(Layer):
 
 
 class IndRNN(RNN):
-    """Fully-connected RNN where the output is to be fed back to input.
+    """Indipendently-connected RNN where the output is to be fed back to input.
     # Arguments
         units: Positive integer, dimensionality of the output space.
         activation: Activation function to use
@@ -274,11 +280,6 @@ class IndRNN(RNN):
                  stateful=False,
                  unroll=False,
                  **kwargs):
-        if 'implementation' in kwargs:
-            kwargs.pop('implementation')
-            warnings.warn('The `implementation` argument '
-                          'in `SimpleRNN` has been deprecated. '
-                          'Please remove it from your layer call.')
         if K.backend() == 'theano' and (dropout or recurrent_dropout):
             warnings.warn(
                 'RNN dropout is no longer supported with the Theano backend '
@@ -409,7 +410,7 @@ class IndRNN(RNN):
 
 
 class CuDNNIndRNN(_CuDNNRNN):
-    """Fast SimpleRNN implementation backed by [CuDNN](https://developer.nvidia.com/cudnn).
+    """Fast IndRNN implementation backed by [CuDNN](https://developer.nvidia.com/cudnn).
     Can only be run on GPU, with the TensorFlow backend.
 
     # Warning
