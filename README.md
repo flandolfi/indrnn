@@ -4,7 +4,7 @@ This repository contains a Keras implementation of the Independently Recurrent N
 
 The file [`indrnn.py`](https://github.com/flandolfi/indrnn/blob/master/indrnn.py) contains the classes:
 
- - `IndRNNCell`, which construct the basic IndRNN model by slight modifying Keras' `SimpleRNNCell`. Its recurrent kernel is a single-row matrix, which is multiplied element-wise at each timesteps with the model's previous output;
+ - `IndRNNCell`, which construct the basic IndRNN model by slightly modifying Keras' `SimpleRNNCell`. Its recurrent kernel is a single-row matrix, which is multiplied element-wise at each timesteps with the model's previous output;
  - `IndRNN`, which is a `RNN` with a single `IndRNNCell`;
  - `CuDNNIndRNN`, which uses the CuDNN-RNN as a black-box to compute the IndRNN step by trasforming the recurrent kernel in a diagonal matrix. **Warning:** *This is just a stub and it is recommended to use the `IndRNN` class instead.*
 
